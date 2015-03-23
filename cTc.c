@@ -19,7 +19,6 @@ void firstStep(Map *m, Coordinates *c)
     srand( time(NULL) );
     i = rand() % 8 ;
     m->mat[c->x][c->y]->etat='O';
-    printf("%d  -  %d\n",tab[i].x,tab[i].y);
     m->mat[tab[i].x][tab[i].y]->etat='C' ;
     c->x = tab[i].x;
     c->y = tab[i].y;
@@ -224,11 +223,12 @@ void draw(Map *m)
              printf("%c | ",m->mat[i][j]->etat);
          }
          printf("%d",i);
-         printf("   ");
-         for ( j = 0 ; j < MAP_SIZE ; ++j)
-         {
-             printf("%d | ",m->mat[i][j]->priorite);
-         }
+         //Uncomment To display the priority table
+         /* printf("   "); */
+         /* for ( j = 0 ; j < MAP_SIZE ; ++j) */
+         /* { */
+         /*     printf("%d | ",m->mat[i][j]->priorite); */
+         /* } */
      printf("\n");
      for ( k = 0 ; k < 2 * MAP_SIZE ; ++k )
      {
