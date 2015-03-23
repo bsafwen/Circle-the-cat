@@ -1,75 +1,45 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "cTc.h"
 
-const int HIGH=10;
-const int RAYON=5;
-/*Object createObject(coordinates p, Color couleur)
-{
-    Object o ;
-    o.position.x=p.x;
-    o.position.y=p.y;
-    o.cat=NULL;
-    Cercle c;
-    o.cercle=malloc(sizeof(Cercle));
-    o.cercle->etat=0;
-    o.cercle->rayon=RAYON;
-    o.cercle->priorite=HIGH;
-    o.cercle->couleur=Yellow;
-    return o ;
-}*/
-
-void initializeMap(Map m)
+void initializeMap(Map *m, Coordinates *c)
 {
     int i ;
     int j ;
     for(i=0;i<MAP_SIZE;++i)
         for(j=0;j<MAP_SIZE;++j)
         {
-               m[i][j]=malloc(sizeof(Object));
-               m[i][j]->position.x=p.x;
-               m[i][j]->position.y=p.y;
-               m[i][j]->cat=NULL;
-               m[i][j]->cercle=malloc(sizeof(Cercle));
-               m[i][j]->cercle->etat=0;
-               m[i][j]->cercle->rayon=RAYON;
-               //e.g:MAP_SIZE=7 => 3-2-1-0-1-2-3 les priorite augmente en allant vers les bords
-               if(MAP_SIZE/2 - j >=0)
-                     m[i][j]->cercle->priorite=MAP_SIZE/2-j;
+               m->mat[i][j]=malloc(sizeof(Object));
+               m->mat[i][j]->etat='O';
+               m->mat[i][j]->cat=0;
+               if( i <= (MAP_SIZE / 2 ) )
+               {
+                 if( j < i )
+                {
+                       m->mat[i][j]->priorite = MAP_SIZE/2 + 1  - j ;
+                }
+                else if(j > MAP_SIZE - 1 - i)
+                {
+                    m->mat[i][j]->priorite = MAP_SIZE/2 + 1  - j % (MAP_SIZE/2)  ;
+                }
+                else
+                {
+                    m->mat[i][j]->priorite = MAP_SIZE/2 + 1  - i  ;
+                }
+               }
                else
-                     m[i][j]->cercle->priorite=j-MAP_SIZE/2;
+               {
+                    m->mat[i][j]->priorite = m->mat[MAP_SIZE - 1 - i][j]->priorite;
+               }
         }
+    m->mat[c->x][c->y]->etat='C';
 }
 
-void changeColor(Coordinates coo, Color nC, Map m)
-{
-    m[coo.x][coo.y].cercle->couleur=nC;
-}
-
-void moveCat(Chat ch,Coordinates coo, Map m)
-{
-    m[ch.position.x][ch.position.y]->cat=NULL; 
-    free(m[ch.position.x][ch.position.y]->cat);
-    m[coo.x][coo.y]->cat=malloc(sizeof(Cat));
-    m[coo.x][coo.y]->cat->x=coo.x;
-    m[coo.x][coo.y]->cat->y=coo.y;
-}
-
-Cat createCat()
-{
-    Cat temp ;
-    temp.position.x=0;
-    temp.position.y=0;
-    return temp ;
-}
-
-int existWay(Cat ch, Map m)
+int existWay(Coordinates *ch, Map *m) // 1 => there is a way out
 {
     int i,j;
-    for(i=ch.position.x-1;i<=ch.position.x-1;++i){
-        for(j=ch.position.y-1;j<=ch.position.y+1;j++){
-            if !(i < 0 || j < 0 || i >= MAP_SIZE || j >= MAP_SIZE ){
-               if (m[i][j].cercle->etat=1)
+    for(i=ch->x-1;i<=ch->x+1;++i){
+        for(j=ch->y-1;j<=ch->y+1;j++){
+            if (!(i < 0 || j < 0 || i >= MAP_SIZE || j >= MAP_SIZE )){
+               if (m->mat[i][j]->etat=='O')
                     return 1 ;
                 }
              }
@@ -77,27 +47,78 @@ int existWay(Cat ch, Map m)
     return 0 ;
 }
 
-void chaseCat(Coordinates coo, Map m, Chat ch)
+void chaseCat(Map *m)
 {
-    free(m[coo.x][coo.y]->cat);
-    m[coo.x][coo.y]->cat=malloc(sizeof(Chat));
-    m[coo.x][coo.y]->cat->x=coo.x;
-    m[coo.x][coo.y]->cat->y=coo.y;
+    Coordinates coo;
+    printf("Donnez les coordonneés de la case à occuper : ");
+    scanf("%d %d",&coo.x,&coo.y);
+    if(m->mat[coo.x][coo.y]->etat != 'X')
+       m->mat[coo.x][coo.y]->etat='X';
+    else
+        printf("Erreur : position invalide.\n");
 }
 
-Coordinates pathFinder(Map m, Chat c)
+void moveCat(Map *m, Coordinates *c)
 {
     Coordinates max;
-    int mx=-1;
-    for(i=ch.position.x-1;i<=ch.position.x-1;++i){
-        for(j=ch.position.y-1;j<=ch.position.y+1;j++){
-           if(m[i][j]->cercle->priorite>mx)
+    int mx=-1, i , j;
+    for(i=c->x-1;i<=c->x+1;++i){
+        for(j=c->y-1;j<=c->y+1;j++){
+           if(m->mat[i][j]->priorite>mx && m->mat[i][j]->etat != 'X')
            {
-               mx=m[i][j]->cercle->priorite;
                max.x=i;
                max.y=j;
+               j=2+c->y;
+               i=2+c->x;
            }
         }
     }
-    return max ;
+    m->mat[c->x][c->y]->etat='O';
+    m->mat[max.x][max.y]->etat='C' ;
+    c->x = max.x;
+    c->y = max.y;
 }
+
+int gameOver(Map *m,Coordinates *ch) // return 1 if the cat has escaped.\n
+{
+    if(ch->x==0 || ch->y==0 || ch->x==MAP_SIZE-1 || ch->y==MAP_SIZE-1 || (existWay(ch,m)==0))
+    {
+        return 1 ;
+    }
+    return 0 ;
+}
+
+void quitGame(Map *m)
+{
+    int i,j;
+    for ( i = 0 ; i < MAP_SIZE ; ++i )
+        for ( j = 0 ; j < MAP_SIZE ; ++j )
+            free(m->mat[i][j]);
+}
+
+void draw(Map *m)
+{
+    
+     int i,j,k;
+     printf("\n");
+     for ( i = 0 ; i < 4 * MAP_SIZE ; ++i )
+     {
+         printf("~");
+     }
+     printf("\n");
+     for ( i = 0 ; i < MAP_SIZE ; ++i)
+     {
+         printf("| ");
+         for ( j = 0 ; j < MAP_SIZE ; ++j)
+         {
+             printf("%c | ",m->mat[i][j]->etat);
+         }
+     for ( k = 0 ; k < 4 * MAP_SIZE ; ++k )
+     {
+         printf("~");
+     }
+     }
+  
+}
+
+

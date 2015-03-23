@@ -1,6 +1,9 @@
 #ifndef cTc_H
 #define cTc_H
-const MAP_SIZE = 8 ;
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAP_SIZE 11
 
 typedef struct 
 {
@@ -10,27 +13,27 @@ typedef struct
 
 typedef struct
 {
-    Coordinates position ;
-    Cercle *cercle;
-    Cat *cat;/////////////////////////////////////////////////////////////
+      Coordinates *cat;
+      char etat ;
+      int priorite ;
 } Object ;
 
 typedef struct
 {
-   Object ** mat[MAP_SIZE][MAP_SIZE] ;
+   Object *mat[MAP_SIZE][MAP_SIZE] ;
 } Map ;
 
-typedef struct
-{
-    int etat ;
-    size_t rayon ;
-    int priorite ;
-    Color couleur ;
-} Cercle ;
+void moveCat(Map *m, Coordinates *c);
 
-typedef struct
-{
-    Coordinates position ;
-} Chat ;
+int gameOver(Map *m, Coordinates *c);
 
+void chaseCat(Map *m);
+
+int existWay(Coordinates *c, Map *m);
+
+void initializeMap(Map *m, Coordinates *c);
+
+void draw(Map *m);
+
+void quitGame(Map *m);
 #endif
