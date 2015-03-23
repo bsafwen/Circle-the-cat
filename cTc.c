@@ -11,6 +11,8 @@ void firstStep(Map *m, Coordinates *c)
         {
             if(i==c->x && j==c->y)
                 continue;
+            if(m->mat[i][j]->etat=='X')
+                continue;
             tab[k].x= i ;
             tab[k].y=j;
             ++k;

@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define MAP_SIZE 7
+#define MAP_SIZE 11
 
 typedef struct 
 {
