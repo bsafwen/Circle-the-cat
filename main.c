@@ -8,6 +8,9 @@ main()
     chat.y = MAP_SIZE/2;
     initializeMap(&map,&chat);
     draw(&map);
+    chaseCat(&map);
+    firstStep(&map, &chat);
+    draw(&map);
     while( !gameOver(&map, &chat) )
     {
         chaseCat(&map);

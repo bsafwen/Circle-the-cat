@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define MAP_SIZE 11
+#define MAP_SIZE 7
 
 typedef struct 
 {
@@ -37,4 +37,8 @@ void initializeMap(Map *m, Coordinates *c);
 void draw(Map *m);
 
 void quitGame(Map *m);
+
+int min(int a, int b, int c, int d);
+
+Coordinates distanceMinimale(Coordinates t[8]);
 #endif

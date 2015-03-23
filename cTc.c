@@ -1,5 +1,30 @@
 #include "cTc.h"
 
+void firstStep(Map *m, Coordinates *c)
+{
+    Coordinates tab[8];
+    int i,j;
+    int k=0;
+    for ( i = c->x-1;i<= c->x+1 ; ++i)
+    {
+        for ( j = c->y-1 ; j <= c->y+1 ; ++j)
+        {
+            if(i==c->x && j==c->y)
+                continue;
+            tab[k].x= i ;
+            tab[k].y=j;
+            ++k;
+        }
+    }
+    srand( time(NULL) );
+    i = rand() % 8 ;
+    m->mat[c->x][c->y]->etat='O';
+    printf("%d  -  %d\n",tab[i].x,tab[i].y);
+    m->mat[tab[i].x][tab[i].y]->etat='C' ;
+    c->x = tab[i].x;
+    c->y = tab[i].y;
+}
+
 void initializeMap(Map *m, Coordinates *c)
 {
     int i ;
@@ -39,6 +64,7 @@ void initializeMap(Map *m, Coordinates *c)
         m->mat[rand()%MAP_SIZE][rand()%MAP_SIZE]->etat='X';
     }
     m->mat[c->x][c->y]->etat='C';
+    m->mat[c->y][c->y]->cat=c;
 }
 
 int existWay(Coordinates *ch, Map *m) // 1 => there is a way out
@@ -78,31 +104,82 @@ void chaseCat(Map *m)
     }
 }
 
+int min(int a, int b, int c, int d)
+{
+    int t[4];
+    t[1]=a;
+    t[2]=b;
+    t[3]=c;
+    t[4]=d;
+    int min = MAP_SIZE * 2 ;
+    int i,index;
+    for ( i = 0 ; i < 4 ; ++i )
+    {
+        if(t[i] < min)
+        {
+            min = t[i] ;
+            index = i ;
+        }
+    }
+    return t[index];
+}
+
+Coordinates distanceMinimale(Coordinates t[8])
+{
+    Coordinates temp ;
+    int m = MAP_SIZE * 2 ;
+    int i ;
+    int distance ;
+    for ( i = 0 ; i < 8 ; ++i )
+    {
+        if ( t[i].x  >= 0 ) 
+        {
+            distance = min(t[i].x,t[i].y,MAP_SIZE-1-t[i].x,MAP_SIZE-1-t[i].y);
+            if(distance < m)
+            {
+                m = distance ;
+                temp = t[i];
+            }
+        }
+    }
+    return temp ;
+}
+
 void moveCat(Map *m, Coordinates *c)
 {
-    Coordinates max;
-    int mx=-1000, i , j;
+    Coordinates max, tab[8];
+    int mx=-100, i , j, k=0 ;
     for(i=c->x-1;i<=c->x+1;++i){
         for(j=c->y-1;j<=c->y+1;j++){
             if ( ! ( i < 0 || j < 0 || i >= MAP_SIZE || j >= MAP_SIZE) )
             {
-            if (i==0 || j==0 || i ==MAP_SIZE-1 || j==MAP_SIZE-1)
-            {
-                max.x=i;
-                max.y=j;
-               j=2+c->y;
-               i=2+c->x;
+            /* if (i==0 || j==0 || i ==MAP_SIZE-1 || j==MAP_SIZE-1) */
+            /* { */
+            /*     max.x=i; */
+            /*     max.y=j; */
+            /*    j=2+c->y; */
+            /*    i=2+c->x; */
+            /* } */
+          
+                if(m->mat[i][j]->priorite>mx && m->mat[i][j]->etat != 'X' && m->mat[i][j]->etat != 'C' )
+                {
+                    mx=m->mat[i][j]->priorite;
+                    tab[k].x=i;
+                    tab[k++].y=j;
+                }
+                else
+                {
+                    tab[k].x=tab[k].y=-1;
+                    ++k;
+                }
             }
-          else  if(m->mat[i][j]->priorite>mx && m->mat[i][j]->etat != 'X' && m->mat[i][j]->etat != 'C')
-           {
-               max.x=i;
-               max.y=j;
-           }
-         }
         }
     }
+    max = distanceMinimale(tab) ;
     m->mat[c->x][c->y]->etat='O';
+    m->mat[c->x][c->y]->cat=0;
     m->mat[max.x][max.y]->etat='C' ;
+    m->mat[c->x][c->y]->cat=c;
     c->x = max.x;
     c->y = max.y;
 }
@@ -134,9 +211,9 @@ void draw(Map *m)
          printf("%d   ",k );
      }
      printf("\n");
-     for ( i = 0 ; i < 4 * MAP_SIZE ; ++i )
+     for ( i = 0 ; i < 2 * MAP_SIZE ; ++i )
      {
-         printf("-");
+         printf("- ");
      }
      printf("\n");
      for ( i = 0 ; i < MAP_SIZE ; ++i)
@@ -147,19 +224,18 @@ void draw(Map *m)
              printf("%c | ",m->mat[i][j]->etat);
          }
          printf("%d",i);
-         /* printf("   "); */
-         /* for ( j = 0 ; j < MAP_SIZE ; ++j) */
-         /* { */
-         /*     printf("%d | ",m->mat[i][j]->priorite); */
-         /* } */
+         printf("   ");
+         for ( j = 0 ; j < MAP_SIZE ; ++j)
+         {
+             printf("%d | ",m->mat[i][j]->priorite);
+         }
      printf("\n");
-     for ( k = 0 ; k < 4 * MAP_SIZE ; ++k )
+     for ( k = 0 ; k < 2 * MAP_SIZE ; ++k )
      {
-         printf("-");
+         printf("- ");
      }
      printf("\n");
      }
   
 }
-
 
