@@ -11,9 +11,10 @@ main()
     while( !gameOver(&map, &chat) )
     {
         chaseCat(&map);
-        draw(&map);
         if(existWay(&chat,&map))
+        {
             moveCat(&map, &chat);
+        }
         draw(&map);
     }
     if(chat.x ==0 || chat.y == 0 || chat.x == MAP_SIZE - 1 ||  chat.y == MAP_SIZE-1 )
