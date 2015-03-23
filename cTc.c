@@ -59,7 +59,7 @@ void initializeMap(Map *m, Coordinates *c)
         }
     srand( time(NULL) );
     int counter;
-    counter = rand()%4 + 9 ;
+    counter = rand()%3 + 9 ;
     for ( i = 0 ; i < counter ; ++i )
     {
         m->mat[rand()%MAP_SIZE][rand()%MAP_SIZE]->etat='X';
