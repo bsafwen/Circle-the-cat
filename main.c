@@ -2,6 +2,7 @@
 
 Coordinates chat ;
 Map map ;
+
 main()
 {
     chat.x = MAP_SIZE/2;

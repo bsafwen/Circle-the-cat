@@ -1,5 +1,6 @@
 #ifndef cTc_H
 #define cTc_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
