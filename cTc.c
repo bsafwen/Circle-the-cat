@@ -5,10 +5,22 @@ void firstStep(Map *m, Coordinates *c)
     Coordinates tab[8];
     int i,j;
     int k=0;
+    for( i = 0 ; i < 8 ; ++i )
+        tab[i].x=tab[i].y=-1;
     for ( i = c->x-1;i<= c->x+1 ; ++i)
     {
         for ( j = c->y-1 ; j <= c->y+1 ; ++j)
         {
+            if ( (c->x+1) % 2 != 0 )
+            {
+                if (( i == c->x - 1 && j == c->y - 1 ) || ( i == c->x + 1 && j == c->y - 1))
+                    continue ;
+            }
+            else
+            {
+                if (( i == c->x - 1 && j == c->y + 1 ) || ( i == c->x + 1 && j == c->y + 1))
+                    continue ;
+            }
             if(i==c->x && j==c->y)
                 continue;
             if(m->mat[i][j]->etat=='X')
@@ -19,7 +31,11 @@ void firstStep(Map *m, Coordinates *c)
         }
     }
     srand( time(NULL) );
-    i = rand() % 8 ;
+    do
+    {
+        i = rand() % 8 ;
+    }
+    while(tab[i].x < 0 );
     m->mat[c->x][c->y]->etat='O';
     m->mat[tab[i].x][tab[i].y]->etat='C' ;
     c->x = tab[i].x;
@@ -33,15 +49,15 @@ void initializeMap(Map *m, Coordinates *c)
     for(i=0;i<MAP_SIZE;++i)
         for(j=0;j<MAP_SIZE;++j)
         {
-               k=i;
-               m->mat[i][j]=malloc(sizeof(Object));
-               m->mat[i][j]->etat='O';
-               m->mat[i][j]->cat=0;
-               if( i <= (MAP_SIZE / 2 ) )
-               {
-                 if( j < i )
+            k=i;
+            m->mat[i][j]=malloc(sizeof(Object));
+            m->mat[i][j]->etat='O';
+            m->mat[i][j]->cat=0;
+            if( i <= (MAP_SIZE / 2 ) )
+            {
+                if( j < i )
                 {
-                       m->mat[i][j]->priorite = MAP_SIZE/2 + 1  - j ;
+                    m->mat[i][j]->priorite = MAP_SIZE/2 + 1  - j ;
                 }
                 else if(j > MAP_SIZE - 1 - i)
                 {
@@ -51,18 +67,21 @@ void initializeMap(Map *m, Coordinates *c)
                 {
                     m->mat[i][j]->priorite = MAP_SIZE/2 + 1  - i  ;
                 }
-              }
-               else
-               {
-                    m->mat[i][j]->priorite = m->mat[MAP_SIZE - 1 - i][j]->priorite;
-               }
+            }
+            else
+            {
+                m->mat[i][j]->priorite = m->mat[MAP_SIZE - 1 - i][j]->priorite;
+            }
         }
     srand( time(NULL) );
-    int counter;
+    int counter,x,y;
     counter = rand()%3 + 9 ;
     for ( i = 0 ; i < counter ; ++i )
     {
-        m->mat[rand()%MAP_SIZE][rand()%MAP_SIZE]->etat='X';
+        x=rand()%MAP_SIZE;
+        y=rand()%MAP_SIZE;
+        m->mat[x][y]->etat='X';
+        m->mat[x][y]->priorite -= 1 ;
     }
     m->mat[c->x][c->y]->etat='C';
     m->mat[c->y][c->y]->cat=c;
@@ -73,11 +92,21 @@ int existWay(Coordinates *ch, Map *m) // 1 => there is a way out
     int i,j;
     for(i=ch->x-1;i<=ch->x+1;++i){
         for(j=ch->y-1;j<=ch->y+1;j++){
+            if ( (ch->x+1) % 2 != 0 )
+            {
+                if (( i == ch->x + 1 && j == ch->y + 1 ) || ( i == ch->x - 1 && j == ch->y + 1))
+                    continue ;
+            }
+            else
+            {
+                if (( i == ch->x + 1 && j == ch->y - 1 ) || ( i == ch->x - 1 && j == ch->y - 1))
+                    continue ;
+            }
             if (!(i < 0 || j < 0 || i >= MAP_SIZE || j >= MAP_SIZE )){
-               if (m->mat[i][j]->etat=='O')
+                if (m->mat[i][j]->etat=='O')
                     return 1 ;
-                }
-             }
+            }
+        }
     }
     return 0 ;
 }
@@ -85,9 +114,15 @@ int existWay(Coordinates *ch, Map *m) // 1 => there is a way out
 void chaseCat(Map *m)
 {
     Coordinates coo;
-    printf("Donnez les coordonneés de la case à occuper : ");
+    printf("Donnez les coordonneés de la case à occuper (0 - %d) : ", MAP_SIZE);
     scanf("%d %d",&coo.x,&coo.y);
-    while (m->mat[coo.x][coo.y]->etat == 'X' || m->mat[coo.x][coo.y]->etat == 'C')
+    while( coo.x < 0 || coo.x >= MAP_SIZE || coo.y < 0 || coo.y >= MAP_SIZE)
+    {
+        printf("Erreur : position invalide.\n");
+        printf("Donnez les coordonneés de la case à occuper : ");
+        scanf("%d %d",&coo.x,&coo.y);
+    }
+    while (m->mat[coo.x][coo.y]->etat == 'X' || m->mat[coo.x][coo.y]->etat == 'C' )
     {   
         printf("Erreur : position invalide.\n");
         printf("Donnez les coordonneés de la case à occuper : ");
@@ -97,6 +132,16 @@ void chaseCat(Map *m)
     int i,j;
     for(i=coo.x-1;i<=coo.x+1;++i){
         for(j=coo.y-1;j<=coo.y+1;j++){
+            if ( (coo.x+1) % 2 != 0 )
+            {
+                if (( i == coo.x - 1 && j == coo.y - 1 ) || ( i == coo.x + 1 && j == coo.y - 1))
+                    continue ;
+            }
+            else
+            {
+                if (( i == coo.x - 1 && j == coo.y + 1 ) || ( i == coo.x + 1 && j == coo.y + 1))
+                    continue ;
+            }
             if (!(i < 0 || j < 0 || i >= MAP_SIZE || j >= MAP_SIZE ))
             {
                 m->mat[i][j]->priorite -= 1 ;
@@ -150,27 +195,31 @@ void moveCat(Map *m, Coordinates *c)
 {
     Coordinates max, tab[8];
     int mx=-100, i , j, k=0 ;
+
+    for( i = 0 ; i < 8 ; ++i )
+        tab[i].x=tab[i].y=-1;
+
     for(i=c->x-1;i<=c->x+1;++i){
         for(j=c->y-1;j<=c->y+1;j++){
+            if ( (c->x == i) && (c->y == j) )
+                continue;
+            if ( (c->x+1) % 2 != 0 )
+            {
+                if (( i == c->x + 1 && j == c->y + 1 ) || ( i == c->x - 1 && j == c->y + 1))
+                    continue ;
+            }
+            else
+            {
+                if (( i == c->x + 1 && j == c->y - 1 ) || ( i == c->x - 1 && j == c->y - 1))
+                    continue ;
+            }
             if ( ! ( i < 0 || j < 0 || i >= MAP_SIZE || j >= MAP_SIZE) )
             {
-            /* if (i==0 || j==0 || i ==MAP_SIZE-1 || j==MAP_SIZE-1) */
-            /* { */
-            /*     max.x=i; */
-            /*     max.y=j; */
-            /*    j=2+c->y; */
-            /*    i=2+c->x; */
-            /* } */
-          
                 if(m->mat[i][j]->priorite>mx && m->mat[i][j]->etat != 'X' && m->mat[i][j]->etat != 'C' )
                 {
                     mx=m->mat[i][j]->priorite;
                     tab[k].x=i;
-                    tab[k++].y=j;
-                }
-                else
-                {
-                    tab[k].x=tab[k].y=-1;
+                    tab[k].y=j;
                     ++k;
                 }
             }
@@ -178,9 +227,7 @@ void moveCat(Map *m, Coordinates *c)
     }
     max = distanceMinimale(tab) ;
     m->mat[c->x][c->y]->etat='O';
-    m->mat[c->x][c->y]->cat=0;
     m->mat[max.x][max.y]->etat='C' ;
-    m->mat[c->x][c->y]->cat=c;
     c->x = max.x;
     c->y = max.y;
 }
@@ -204,40 +251,71 @@ void quitGame(Map *m)
 
 void draw(Map *m)
 {
-    
-     int i,j,k;
-     printf("  ");
-     for ( k = 0 ; k <  MAP_SIZE ; ++k )
-     {
-         printf("%d   ",k );
-     }
-     printf("\n");
-     for ( i = 0 ; i < 2 * MAP_SIZE ; ++i )
-     {
-         printf("- ");
-     }
-     printf("\n");
-     for ( i = 0 ; i < MAP_SIZE ; ++i)
-     {
-         printf("| ");
-         for ( j = 0 ; j < MAP_SIZE ; ++j)
-         {
-             printf("%c | ",m->mat[i][j]->etat);
-         }
-         printf("%d",i);
-         //Uncomment To display the priority table
-         /* printf("   "); */
-         /* for ( j = 0 ; j < MAP_SIZE ; ++j) */
-         /* { */
-         /*     printf("%d | ",m->mat[i][j]->priorite); */
-         /* } */
-     printf("\n");
-     for ( k = 0 ; k < 2 * MAP_SIZE ; ++k )
-     {
-         printf("- ");
-     }
-     printf("\n");
-     }
-  
+
+    int i,j,k;
+    printf("  ");
+    for ( k = 0 ; k <  MAP_SIZE ; ++k )
+    {
+        printf("%d    ",k );
+    }
+    printf("\n");
+    for ( i = 0 ; i < 3 * MAP_SIZE - 5  ; ++i )
+    {
+        printf("→ ");
+    }
+    printf("\n");
+    for ( i = 0 ; i < MAP_SIZE ; ++i)
+    {
+        if( (i+1) % 2 == 0)
+            printf("  ");
+        printf("| ");
+        /* for ( j = 0 ; j < MAP_SIZE ; ++j) */
+        /* { */
+        /*     printf("   | "); */
+        /* } */
+        /* printf("\n"); */
+        /* if( (i+1) % 2 == 0) */
+        /*     printf("    "); */
+        /* printf("| "); */
+        for ( j = 0 ; j < MAP_SIZE ; ++j)
+        {
+            printf("%c  | ",m->mat[i][j]->etat);
+        }
+        if( (i+1) % 2 != 0)
+            printf("   ");
+        else
+            printf(" ");
+        printf("%d",i);
+        printf("\n");
+        /* if( (i+1) % 2 == 0) */
+        /*     printf("    "); */
+        /* printf("| "); */
+        /* for ( j = 0 ; j < MAP_SIZE ; ++j) */
+        /* { */
+        /*     printf("   | "); */
+        /* } */
+        //Uncomment To display the priority table
+        /* printf("   "); */
+        /* for ( j = 0 ; j < MAP_SIZE ; ++j) */
+        /* { */
+        /*     printf("%d | ",m->mat[i][j]->priorite); */
+        /* } */
+        /* printf("\n"); */
+        if( i != MAP_SIZE - 1)
+        {
+            for ( k = 0 ; k < 3 * MAP_SIZE - 4; ++k )
+            {
+                printf("← ");
+            }
+        }
+        else
+            for ( k = 0 ; k < 3 * MAP_SIZE - 5; ++k )
+            {
+                printf("← ");
+            }
+
+        printf("\n");
+    }
+
 }
 
