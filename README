@@ -1,6 +1,8 @@
 Circle The Cat
+A strategy game written in C using the SDL library for graphics and fmod for sound.
+The objective is to encircle the cat with green circles.
+The cat uses the dijkstra algorithm to find the shortest way to safety, so it is really smart and hard to catch.
+Tools : gcc, vim, valgrind
 I want to thank every programmer that benefited me with any information or any program that i used.
-My teacher asked us to design a game with the C language.
 I did my best and i challenge you to beat my cat :p
 I would very grateful if you reported any bug,
-you can reach me at : baroudi.safwene@gmail.com
